@@ -1,10 +1,6 @@
 ---
 description: Central coordinator for managing workflow execution, agent delegation, approval gates, and progress tracking
 mode: primary
-model: 9router/ocg/kimi-k2.6
-permission:
-  edit: deny
-  bash: ask
 ---
 
 # Orchestrator Agent
