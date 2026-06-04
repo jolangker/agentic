@@ -2,11 +2,6 @@
 description: Planning specialist that analyzes requirements and creates structured implementation plans
 mode: subagent
 model: 9router/ocg/glm-5.1
-permission:
-  edit:
-    "docs/plans/**": allow
-    "*": deny
-  bash: allow
 ---
 
 # Planner Agent
@@ -57,13 +52,19 @@ Every plan you create must include these sections:
 ### 1. Objective
 Clear, concise statement of what needs to be accomplished.
 
-### 2. Requirements
+### 2. Metadata
+- **Ticket ID**: The provided TICKET-ID
+- **Priority**: P0 (critical) / P1 (high) / P2 (medium) / P3 (low)
+- **Effort Estimate**: S (< 1h) / M (1-4h) / L (4-12h) / XL (> 12h)
+- **Risk Level**: Low / Medium / High
+
+### 3. Requirements
 Enumerated list of functional and non-functional requirements.
 
-### 3. Assumptions
+### 4. Assumptions
 Any assumptions made during planning that should be validated.
 
-### 4. Affected Files
+### 5. Affected Files
 Complete list of files to be:
 - Modified (existing files)
 - Created (new files)
@@ -71,13 +72,29 @@ Complete list of files to be:
 
 Include file paths and brief reason for each change.
 
-### 5. Implementation Steps
+### 6. Implementation Steps
 Ordered, actionable steps for the implementer to follow. Each step should be:
 - Clear and specific
 - Logically ordered
 - Testable when complete
 
-### 6. Risks
+**Step Format:**
+```
+Step N: [Description]
+  - Depends on: [previous step numbers, or "none"]
+  - Files: [files touched in this step]
+  - Verify: [how to confirm this step is done]
+```
+
+### 7. CI/CD Impact
+Assess impact on continuous integration and deployment:
+- Will this break existing builds? (Yes/No)
+- New environment variables needed? (list them)
+- New dependencies added? (list them)
+- Database migrations required? (Yes/No)
+- Feature flags needed? (Yes/No)
+
+### 8. Risks
 Potential issues to watch for:
 - Breaking changes
 - Performance concerns
@@ -86,7 +103,19 @@ Potential issues to watch for:
 - Edge cases
 - Integration challenges
 
-### 7. Acceptance Criteria
+### 9. Rollback Plan
+Steps to revert this change if issues arise:
+1. [First rollback step]
+2. [Second rollback step]
+3. [Verification that rollback is complete]
+
+Include:
+- Files to revert
+- Dependencies to remove
+- Database changes to undo
+- Configuration to restore
+
+### 10. Acceptance Criteria
 Clear, testable conditions that must be met. Format as:
 - [ ] Criterion 1
 - [ ] Criterion 2
@@ -162,6 +191,12 @@ A good plan:
 ```markdown
 # Feature: Add User Authentication
 
+## Metadata
+- **Ticket ID**: 20260603-1430-add-auth
+- **Priority**: P1
+- **Effort Estimate**: L
+- **Risk Level**: High
+
 ## Objective
 Implement JWT-based authentication for the API with login and logout endpoints.
 
@@ -184,19 +219,56 @@ Implement JWT-based authentication for the API with login and logout endpoints.
 - `package.json` - MODIFY - add jsonwebtoken dependency
 
 ## Implementation Steps
-1. Install jsonwebtoken and @types/jsonwebtoken dependencies
-2. Create authentication controller with login and logout methods
-3. Create JWT verification middleware
-4. Add authentication routes to Express app
-5. Update TypeScript types for authenticated requests
-6. Add error handling for invalid credentials
-7. Add error handling for expired tokens
+
+Step 1: Install dependencies
+  - Depends on: none
+  - Files: package.json
+  - Verify: `npm ls jsonwebtoken` shows installed
+
+Step 2: Create authentication controller
+  - Depends on: 1
+  - Files: src/controllers/authController.ts
+  - Verify: File compiles without errors
+
+Step 3: Create JWT middleware
+  - Depends on: 2
+  - Files: src/middleware/auth.ts
+  - Verify: Middleware exports correctly
+
+Step 4: Add authentication routes
+  - Depends on: 2, 3
+  - Files: src/routes/auth.ts
+  - Verify: Routes registered in app
+
+Step 5: Update TypeScript types
+  - Depends on: 3
+  - Files: src/types/express.d.ts
+  - Verify: `tsc --noEmit` passes
+
+Step 6: Add error handling
+  - Depends on: 4
+  - Files: src/controllers/authController.ts
+  - Verify: Error cases return proper status codes
+
+## CI/CD Impact
+- Will this break existing builds? No
+- New environment variables needed: JWT_SECRET
+- New dependencies added: jsonwebtoken, @types/jsonwebtoken
+- Database migrations required: No
+- Feature flags needed: No
 
 ## Risks
 - Token secret must be kept secure (use environment variable)
 - Token expiration needs to be consistent with refresh strategy
 - Logout doesn't actually invalidate JWT (consider token blacklist if needed)
 - Rate limiting should be added to prevent brute force attacks
+
+## Rollback Plan
+1. Revert package.json and run `npm install`
+2. Delete created files: authController.ts, auth middleware, auth routes
+3. Revert express.d.ts changes
+4. Remove JWT_SECRET from environment
+5. Verify build passes: `npm run build`
 
 ## Acceptance Criteria
 - [ ] POST /auth/login accepts email and password, returns JWT token
