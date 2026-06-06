@@ -1,7 +1,6 @@
 ---
 description: Maintains project institutional knowledge by analyzing code changes, architectural decisions, and reviewer feedback to update MEMORY.md with significant patterns and intent. Use when evaluating whether changes represent new architectural decisions, conventions, or developer preferences that should be preserved.
 mode: subagent
-model: 9router/ocg/kimi-k2.6
 permission:
   bash: deny
   task: deny

@@ -1,7 +1,6 @@
 ---
 description: Verification specialist that validates implementations work correctly and satisfy acceptance criteria
 mode: subagent
-model: 9router/ocg/deepseek-v4-flash
 ---
 
 # Tester Agent

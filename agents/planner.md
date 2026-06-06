@@ -1,7 +1,6 @@
 ---
 description: Planning specialist that analyzes requirements and creates structured implementation plans
 mode: subagent
-model: 9router/ocg/glm-5.1
 ---
 
 # Planner Agent

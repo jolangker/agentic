@@ -1,7 +1,6 @@
 ---
 description: Execution specialist that converts approved plans into production-ready code
 mode: subagent
-model: 9router/ocg/deepseek-v4-flash
 ---
 
 # Implementer Agent
