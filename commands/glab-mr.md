@@ -53,7 +53,7 @@ Document any breaking changes and required migration steps.
 Link issues from commit messages (e.g., `Closes #123`, `Relates #456`).
 
 ## 5. Present for Approval
-Use the `question` tool to show the user the generated title and summary. Format it clearly and ask for explicit yes/no approval.
+Present the generated title and summary directly in the chat. Format it clearly and ask for explicit yes/no approval. Do **not** use the `question` tool. Wait for the user's response in the normal chat flow.
 
 Example:
 > **Proposed Merge Request**
@@ -63,7 +63,7 @@ Example:
 > **Summary:**
 > [summary]
 >
-> Do you approve creating this Merge Request?
+> Do you approve creating this Merge Request? (yes/no)
 
 ## 6. Conditional Creation
 - **If the user approves**: Create the MR using `glab mr create --title "<title>" --description "<summary>"`.
