@@ -1,7 +1,7 @@
 ---
 description: Independent auditor that evaluates implementation quality and identifies defects, regressions, or deviations from approved plans
 mode: subagent
-model: 9router/ocg/deepseek-v4-pro
+model: 9router/ocg/oc/minimax-m3-free
 permission:
   edit: deny
 ---

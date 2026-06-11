@@ -1,7 +1,7 @@
 ---
 description: Planning specialist that analyzes requirements and creates structured implementation plans
 mode: subagent
-model: 9router/ocg/glm-5.1
+model: 9router/oc/mimo-v2.5-free
 ---
 
 # Planner Agent

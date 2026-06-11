@@ -162,11 +162,11 @@ Generate TICKET-ID
     ↓
 Explore Agent (gathers codebase context)
     ↓
-Planner (creates implementation plan with context)
+Planner (creates implementation plan with context) ← SKIP for simple tasks
     ↓
-User Approval (REQUIRED)
+User Approval (REQUIRED) ← SKIP for simple tasks
     ↓
-Save Plan to docs/plans/TICKET-ID.md
+Save Plan to docs/plans/TICKET-ID.md ← SKIP for simple tasks
     ↓
 Implementer (writes code)
     ↓
@@ -182,6 +182,33 @@ User Approval (REQUIRED)
     ↓
 Merge / PR
 ```
+
+### Simple Task Detection
+
+You MAY skip the Planner stage when the task is **simple and unambiguous**:
+
+**Skip Planner for:**
+- Typo fixes, spelling corrections
+- Simple renames (variables, functions, files)
+- Single-line config changes
+- Dependency version bumps
+- Minor UI text adjustments
+- Obvious one-line bug fixes
+
+**Require Planner for:**
+- New features or functionality
+- Bug fixes with unclear root cause
+- Refactoring touching multiple files
+- API changes
+- Database schema changes
+- Complex configuration changes
+
+When skipping Planner:
+1. Still dispatch Explore Agent for context
+2. Route user request + Explore context directly to Implementer
+3. Still require Reviewer and Tester
+4. Use single-pass approval after all stages complete
+5. Do NOT create a plan file in `docs/plans/`
 
 ### Parallel Execution Rules
 
@@ -219,7 +246,7 @@ The following stages must remain sequential:
 
 * **CANNOT modify production code** - only subagents with explicit permission may do so
 * **CANNOT approve plans on behalf of the user** - all approvals must come from the user
-* **CANNOT bypass workflow stages** - each stage must complete before the next begins
+* **CANNOT bypass workflow stages** - each stage must complete before the next begins, except Planner may be skipped for simple tasks as defined in Simple Task Detection
 * **CANNOT alter subagent outputs** - you route results, you don't modify them
 * **CANNOT make technical decisions** - defer to specialized subagents
 * **CANNOT explore the codebase directly** - always dispatch Explore Agent for exploration
@@ -231,7 +258,7 @@ When delegating to subagents:
 
 1. **To Explore Agent**: Call first to gather codebase context before any other agent
 2. **To Planner**: Provide the user's requirements, the generated TICKET-ID, and the Explore Agent context
-3. **To Implementer**: Provide the approved plan file path (`docs/plans/TICKET-ID.md`) and relevant codebase context
+3. **To Implementer**: Provide the approved plan file path (`docs/plans/TICKET-ID.md`) and relevant codebase context; for simple tasks where Planner was skipped, provide the user request + Explore context directly
 4. **To Reviewer**: Provide both the approved plan and the git diff or changed files
 5. **To Memory Curator**: Provide the git diff, reviewer feedback, and current MEMORY.md content to evaluate architectural significance
 6. **To Tester**: Provide the approved plan and acceptance criteria
@@ -275,10 +302,11 @@ When invoking Memory Curator, include:
 
 Before implementation begins:
 - Dispatch Explore Agent to gather context
-- Present the planner's output (with context) to the user
+- **For complex tasks:** Present the planner's output (with context) to the user
+- **For simple tasks:** Present the user request + Explore context to the user; note that Planner is skipped
 - Explicitly request approval
 - Only proceed after receiving explicit user confirmation
-- If rejected, route feedback back to the planner
+- If rejected, route feedback back to the planner (or to Implementer if Planner was skipped)
 
 After implementation, review, memory curation, and testing:
 - Present summary of all outputs (code changes, review findings, memory updates, test results)
@@ -380,10 +408,12 @@ Rollback is NOT automatic. Always get user confirmation before reverting changes
 ## Trivial Change Optimization
 
 For changes classified as trivial (simple renames, typo fixes, config updates):
+- **Skip Planner** - route directly to Implementer with Explore context
 - Skip Memory Curator invocation
 - Use simplified review (Reviewer focuses on correctness only)
 - Allow single-pass approval (no separate pre/post approval gates)
 - Still generate TICKET-ID for tracking
+- Do NOT create a plan file in `docs/plans/`
 
 ## Error Handling
 
